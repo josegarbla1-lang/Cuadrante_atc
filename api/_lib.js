@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 const DAYS = 7;
 
-const secret = () => process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD || '';
+// Contraseña por defecto del servidor (no se ve desde la web). Si defines ADMIN_PASSWORD en Vercel, esa tiene prioridad.
+const DEFAULT_PASSWORD = 'AH18';
+const adminPassword = () => process.env.ADMIN_PASSWORD || DEFAULT_PASSWORD;
+const secret = () => process.env.SESSION_SECRET || ('atc-sesion-' + adminPassword());
 const sign = (v) => crypto.createHmac('sha256', secret()).update(v).digest('hex');
 const sha = (v) => crypto.createHash('sha256').update(String(v)).digest();
 
@@ -10,7 +13,7 @@ function safeEq(a, b) {
   return A.length === B.length && crypto.timingSafeEqual(A, B);
 }
 function passwordOk(p) {
-  const real = process.env.ADMIN_PASSWORD;
+  const real = adminPassword();
   if (!real || typeof p !== 'string') return false;
   return crypto.timingSafeEqual(sha(p), sha(real));
 }
