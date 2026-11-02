@@ -5,6 +5,7 @@
 (function(){
   var root = document.documentElement;
   root.classList.add('booting', 'visitor');
+  window.ATC_SERVER = true;
   setTimeout(function(){ root.classList.remove('booting'); }, 3000);
 
   function api(path, opts){
@@ -31,9 +32,14 @@
       if (!timer) timer = setInterval(function(){ if (!document.hidden) refresh(); }, 60000);
       return function(){ listeners = listeners.filter(function(x){ return x !== l; }); };
     } }; },
-    doc: function(path){ return { set: function(data){
-      return api('/api/nights', { method: 'PUT', body: JSON.stringify({ id: path.split('/')[1], data: data }) }).then(refresh);
-    } }; }
+    doc: function(path){ var id = path.split('/')[1]; return {
+      set: function(data){
+        return api('/api/nights', { method: 'PUT', body: JSON.stringify({ id: id, data: data }) }).then(function(r){ return refresh().then(function(){ return r; }); });
+      },
+      delete: function(){
+        return api('/api/nights?id=' + encodeURIComponent(id), { method: 'DELETE' }).then(function(r){ return refresh().then(function(){ return r; }); });
+      }
+    }; }
   };
   var isEditor = false;
   var user = { canEdit: function(){
@@ -429,6 +435,8 @@ h2{margin:0; font-family:var(--font-display); font-weight:600; font-size:18px; l
 .cp-btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
 .cm-pp{display:flex; align-items:center; gap:8px; padding:8px 8px 2px; margin-top:4px; border-top:1px solid var(--line); font-size:13px; color:var(--ink)}
 [hidden]{display:none!important}
+.btn.danger{color:var(--bad); border-color:color-mix(in srgb, var(--bad) 45%, var(--line2))}
+.btn.danger:hover{background:var(--bad-bg)}
 .wk-title{margin:6px 0 4px; font-family:var(--font-display); font-weight:700; font-size:26px; letter-spacing:.04em; text-transform:uppercase}
 .wk-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:12px; margin-top:10px}
 .wk-day{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:8px; min-width:0}
@@ -533,6 +541,7 @@ h2{margin:0; font-family:var(--font-display); font-weight:600; font-size:18px; l
         <button class="btn" id="wkGen" type="button">Generar días vacíos</button>
         <button class="btn" id="wkPdf1" type="button">PDF resumen</button>
         <button class="btn primary" id="wkPdfAll" type="button">PDF semana completa</button>
+        <button class="btn" id="wkZip" type="button" title="Descarga una carpeta ZIP con un PDF por cada cuadrante guardado">Descargar todos (ZIP)</button>
       </div>
     </div>
     <h2 class="wk-title" id="wkTitle"></h2>
@@ -550,6 +559,7 @@ h2{margin:0; font-family:var(--font-display); font-weight:600; font-size:18px; l
       <div class="bd-actions">
         <button class="btn" id="bdRestBtn" type="button" aria-pressed="true">Descansos</button>
         <button class="btn" id="bdPublish" type="button" hidden>Guardar cuadrante</button>
+        <button class="btn danger" id="bdDelete" type="button" hidden>Eliminar este cuadrante</button>
         <button class="btn" id="bdExport" type="button" hidden title="Genera un archivo HTML solo de consulta para compartir">Descargar página de consulta</button>
         <button class="btn" id="bdFull" type="button">Pantalla completa</button>
         <button class="btn primary" id="bdPdf" type="button">Descargar PDF</button>
@@ -2354,7 +2364,7 @@ function minStaff(sectors, cfg, from){
 
   var nights = [], nightsStatus = 'idle';
 
-  var bdSel = null, bdMsg = '', bdMissing = '', keepSel = false;
+  var bdSel = null, bdMsg = '', bdMissing = '', keepSel = false, delArm = false, delTimer = null;
 
   var pubArm = false, pubTimer = null;
 
@@ -2431,6 +2441,9 @@ function minStaff(sectors, cfg, from){
     pub.hidden = !showPub;
     pub.textContent = pubArm ? 'Ya hay una noche guardada con esa fecha. Pulsa otra vez para sustituirla' : 'Guardar cuadrante';
     $('#bdExport').hidden = !(editor && caps.dl);
+    var dl = $('#bdDelete');
+    dl.hidden = !(bd && bd.published && editor && caps.db);
+    if (bd) dl.textContent = delArm ? 'Pulsa otra vez para eliminar' : 'Eliminar este cuadrante';
     $('#bdPdf').disabled = !bd;
     $('#bdFull').disabled = !bd;
     $('#bdStatus').textContent = statusText(bd);
@@ -2469,9 +2482,9 @@ function minStaff(sectors, cfg, from){
     var payload = bdPayload(bd, new Date().toISOString());
     setBdMsg('Guardando…');
     try {
-      await caps.db.doc('noches/' + bd.id).set(payload);
+      var saveRes = await caps.db.doc('noches/' + bd.id).set(payload);
       bdSel = bd.id;
-      setBdMsg('Guardado en este navegador. Para compartirlo, descarga la página de consulta.');
+      setBdMsg((window.ATC_SERVER ? 'Guardado. Ya lo ven todos los que abran la página.' : 'Guardado en este navegador. Para compartirlo, descarga la página de consulta.') + removedNote(saveRes));
     } catch (e) {
       setBdMsg('No se pudo guardar (' + ((e && e.code) || 'error') + ').');
     }
@@ -2536,7 +2549,14 @@ function minStaff(sectors, cfg, from){
 
   function bindBoard(){
     $('#nav').addEventListener('click', function(e){ var b = e.target.closest('.vtab'); if (b) showView(b.dataset.view, true); });
-    $('#bdNight').addEventListener('change', function(e){ bdSel = e.target.value; bdMsg = ''; bdMissing = ''; pubArm = false; renderBoardView(); });
+    $('#bdNight').addEventListener('change', function(e){ bdSel = e.target.value; bdMsg = ''; bdMissing = ''; pubArm = false; delArm = false; renderBoardView(); });
+    $('#bdDelete').addEventListener('click', function(){
+      var bd = currentBd();
+      if (!bd || !bd.published) return;
+      if (!delArm) { delArm = true; clearTimeout(delTimer); delTimer = setTimeout(function(){ delArm = false; renderBoardView(); }, 6000); renderBoardView(); return; }
+      delArm = false; clearTimeout(delTimer);
+      removeNight(bd.id);
+    });
     $('#bdWho').addEventListener('change', function(e){ bdWho = e.target.value; renderBoardView(); });
     $('#bdRestBtn').addEventListener('click', function(){ bdRest = !bdRest; renderBoardView(); });
     $('#bdExport').addEventListener('click', exportViewer);
@@ -2579,7 +2599,7 @@ function minStaff(sectors, cfg, from){
   }
 
   /* ---------- cuadrantes semanales (solo administrador) ---------- */
-  var wkStart = '', wkMsg = '', wkBusy = false;
+  var wkStart = '', wkMsg = '', wkBusy = false, wkDelId = '', wkDelTimer = null, MAXNIGHTS = 30;
 
   function hashView(){ return location.hash === '#cuadrante' ? 'board' : (location.hash === '#semana' ? 'week' : 'build'); }
   function isoToDate(iso){ var p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12); }
@@ -2646,12 +2666,13 @@ function minStaff(sectors, cfg, from){
       h += '<article class="wk-day' + (bd ? '' : ' empty') + (id === today ? ' today' : '') + '" data-id="' + id + '">' +
         '<header><b>' + esc(dayShort(id)) + '</b><span class="' + (bd ? 'chip-ok' : 'chip-no') + '">' + (bd ? 'Guardado' : 'Sin cuadrante') + '</span></header>' +
         (bd ? '<div class="wk-open" data-wk="view" title="Ver en grande">' + miniHtml(bd) + '</div>' : '<p class="wk-empty">Todavía no hay cuadrante para esta noche.</p>') +
-        '<footer>' + (bd ? '<button class="btn" type="button" data-wk="view">Ver en grande</button><button class="btn" type="button" data-wk="edit">Editar</button>' : '<button class="btn" type="button" data-wk="gen">Generar este día</button>') + '</footer></article>';
+        '<footer>' + (bd ? '<button class="btn" type="button" data-wk="view">Ver en grande</button><button class="btn" type="button" data-wk="edit">Editar</button><button class="btn danger" type="button" data-wk="del">' + (wkDelId === id ? '¿Eliminar? Pulsa otra vez' : 'Eliminar') + '</button>' : '<button class="btn" type="button" data-wk="gen">Generar este día</button>') + '</footer></article>';
     });
     $('#wkGrid').innerHTML = h;
     $('#wkGen').disabled = wkBusy || saved === 7;
     $('#wkPdf1').disabled = $('#wkPdfAll').disabled = !saved;
-    $('#wkStatus').textContent = wkMsg || 'Pulsa un día para verlo en grande. «Generar días vacíos» rellena los días sin cuadrante con los sectores, las personas y las parejas que tengas ahora en el Generador.';
+    $('#wkZip').disabled = !nights.length;
+    $('#wkStatus').textContent = wkMsg || 'Cuadrantes guardados: ' + nights.length + ' de ' + MAXNIGHTS + '. Al pasar de ' + MAXNIGHTS + ' se borra solo el más antiguo; descarga la copia antes si quieres conservarlos. Pulsa un día para verlo en grande. «Generar días vacíos» rellena los días sin cuadrante con los sectores, las personas y las parejas que tengas ahora en el Generador.';
   }
 
   async function generateWeek(){
@@ -2661,7 +2682,7 @@ function minStaff(sectors, cfg, from){
     if (!state.sectors.length || N < 2) { wkSay('Define antes sectores y personas en el Generador.'); return; }
     if (!ids.length) { wkSay('Los 7 días ya tienen cuadrante.'); return; }
     wkBusy = true; renderWeek();
-    var gaps = 0;
+    var gaps = 0, removedAll = [];
     try {
       for (var i = 0; i < ids.length; i++) {
         wkSay('Generando ' + (i + 1) + ' de ' + ids.length + '…');
@@ -2671,9 +2692,10 @@ function minStaff(sectors, cfg, from){
         if (analyze(sch, state.sectors, cfg()).shortSeats > 0) gaps++;
         var bd = { date: ids[i], sectors: state.sectors.map(function(s){ return { name: s.name, from: s.from, to: s.to }; }),
           names: state.people.map(function(_, p){ return nameOf(p); }), rows: sch, maxRun: state.maxRun, minRest: state.minRest };
-        await caps.db.doc('noches/' + ids[i]).set(bdPayload(bd, new Date().toISOString()));
+        var r = await caps.db.doc('noches/' + ids[i]).set(bdPayload(bd, new Date().toISOString()));
+        if (r && r.removed) removedAll = removedAll.concat(r.removed);
       }
-      wkMsg = 'Generados ' + ids.length + (ids.length === 1 ? ' día' : ' días') + ' con la configuración actual.' + (gaps ? ' ' + gaps + ' tienen tramos sin cubrir: ábrelos para revisarlos.' : '');
+      wkMsg = 'Generados ' + ids.length + (ids.length === 1 ? ' día' : ' días') + ' con la configuración actual.' + (gaps ? ' ' + gaps + ' tienen tramos sin cubrir: ábrelos para revisarlos.' : '') + removedNote({ removed: removedAll });
     } catch (e) { wkMsg = 'No se pudo guardar la semana (' + ((e && e.code) || 'error') + ').'; }
     wkBusy = false; renderWeek();
   }
@@ -2704,12 +2726,86 @@ function minStaff(sectors, cfg, from){
     $('#wkGen').addEventListener('click', generateWeek);
     $('#wkPdf1').addEventListener('click', function(){ weekPdf(false); });
     $('#wkPdfAll').addEventListener('click', function(){ weekPdf(true); });
+    $('#wkZip').addEventListener('click', downloadAllZip);
     $('#wkGrid').addEventListener('click', function(e){
       var b = e.target.closest('[data-wk]'), art = e.target.closest('.wk-day');
       if (!b || !art) return;
       var id = art.dataset.id, a = b.dataset.wk;
       if (a === 'view') openNight(id); else if (a === 'edit') loadNight(id); else if (a === 'gen') genDay(id);
+      else if (a === 'del') {
+        if (wkDelId !== id) { wkDelId = id; clearTimeout(wkDelTimer); wkDelTimer = setTimeout(function(){ wkDelId = ''; renderWeek(); }, 6000); renderWeek(); }
+        else { wkDelId = ''; clearTimeout(wkDelTimer); removeNight(id); }
+      }
     });
+  }
+
+
+  /* ---------- eliminar, límite de 30 y copia en ZIP ---------- */
+  function removedNote(res){
+    if (!res || !res.removed || !res.removed.length) return '';
+    return ' Se eliminó automáticamente lo más antiguo (' + res.removed.map(dayShort).join(', ') + ') porque solo se guardan los últimos ' + MAXNIGHTS + '.';
+  }
+  async function removeNight(id){
+    var ok = false;
+    try { await caps.db.doc('noches/' + id).delete(); ok = true; } catch (e) {}
+    if (ok) {
+      if (bdSel === id) { bdSel = editor ? 'draft' : null; }
+      var m = 'Cuadrante del ' + dayShort(id) + ' eliminado.';
+      bdMsg = m; wkMsg = m;
+    } else { var m2 = 'No se pudo eliminar el cuadrante. Comprueba que has iniciado sesión.'; bdMsg = m2; wkMsg = m2; }
+    renderBoardView(); if (VIEW === 'week') renderWeek();
+  }
+
+  var CRC_T = null;
+  function crc32(u8){
+    if (!CRC_T) { CRC_T = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+    var crc = 0xFFFFFFFF;
+    for (var i = 0; i < u8.length; i++) crc = CRC_T[(crc ^ u8[i]) & 255] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  /* ZIP sin compresión: files = [{ name, data: Uint8Array }] */
+  function makeZip(files){
+    var parts = [], central = [], offset = 0, now = new Date();
+    var dosT = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    var dosD = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    var enc = new TextEncoder();
+    files.forEach(function(f){
+      var name = enc.encode(f.name), crc = crc32(f.data), size = f.data.length;
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, dosT, true); lh.setUint16(12, dosD, true); lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+      lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), name, f.data);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, dosT, true); ch.setUint16(14, dosD, true); ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+      ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), name);
+      offset += 30 + name.length + size;
+    });
+    var csize = central.reduce(function(a, p){ return a + p.length; }, 0);
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, csize, true); end.setUint32(16, offset, true);
+    return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/zip' });
+  }
+  async function downloadAllZip(){
+    if (!window.jspdf) { wkSay('No se pudo cargar el generador de PDF. Recarga la página.'); return; }
+    if (!caps.dl) { wkSay('La descarga no está disponible en este momento.'); return; }
+    var list = nights.map(function(n){ return nightBd(n); }).filter(Boolean).sort(function(a, b){ return a.id < b.id ? -1 : 1; });
+    if (!list.length) { wkSay('No hay cuadrantes guardados que descargar.'); return; }
+    try {
+      wkSay('Preparando la carpeta con ' + list.length + ' cuadrantes…');
+      var files = [];
+      for (var i = 0; i < list.length; i++) {
+        files.push({ name: 'cuadrante-' + list[i].id + '.pdf', data: new Uint8Array(buildPdf(list[i]).output('arraybuffer')) });
+        if (i % 5 === 4) await new Promise(function(r){ setTimeout(r, 0); });
+      }
+      await caps.dl.save({ filename: 'cuadrantes-' + todayISO() + '.zip', data: makeZip(files) });
+      wkSay('Carpeta descargada: ' + list.length + ' PDF dentro de un ZIP.');
+    } catch (e) {
+      wkSay(e && e.code === 'declined' ? 'Descarga cancelada.' : 'No se pudo preparar la carpeta (' + ((e && e.code) || 'error') + ').');
+    }
   }
 
 
