@@ -9,6 +9,8 @@ function valid(id, d) {
     && d.sectors.every((s) => s && typeof s.name === 'string' && Number.isInteger(s.from) && Number.isInteger(s.to));
 }
 
+const MAX = 30;
+
 module.exports = async (req, res) => {
   try {
     if (req.method === 'GET') {
@@ -25,6 +27,17 @@ module.exports = async (req, res) => {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
       if (!valid(body.id, body.data)) return res.status(400).json({ error: 'datos_no_validos' });
       await redis(['HSET', 'noches', body.id, JSON.stringify(body.data)]);
+      // solo se conservan los últimos 30: se borra lo más antiguo
+      const keys = ((await redis(['HKEYS', 'noches'])) || []).slice().sort();
+      const removed = keys.length > MAX ? keys.slice(0, keys.length - MAX) : [];
+      if (removed.length) await redis(['HDEL', 'noches'].concat(removed));
+      return res.status(200).json({ ok: true, removed });
+    }
+    if (req.method === 'DELETE') {
+      if (!isEditor(req)) return res.status(401).json({ error: 'no_autorizado' });
+      const id = (req.query && req.query.id) || new URL(req.url, 'http://x').searchParams.get('id');
+      if (typeof id !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(id)) return res.status(400).json({ error: 'datos_no_validos' });
+      await redis(['HDEL', 'noches', id]);
       return res.status(200).json({ ok: true });
     }
     return res.status(405).json({ error: 'metodo' });
