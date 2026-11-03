@@ -6,7 +6,9 @@ function valid(id, d) {
   if (!Array.isArray(d.sectors) || d.sectors.length < 1 || d.sectors.length > 8) return false;
   if (!Array.isArray(d.people) || d.people.length < 1 || d.people.length > 40) return false;
   return d.people.every((p) => p && typeof p.name === 'string' && typeof p.row === 'string' && p.row.length === 18)
-    && d.sectors.every((s) => s && typeof s.name === 'string' && Number.isInteger(s.from) && Number.isInteger(s.to));
+    && d.sectors.every((s) => s && typeof s.name === 'string' && Number.isInteger(s.from) && Number.isInteger(s.to)
+      && (s.spans === undefined || (Array.isArray(s.spans) && s.spans.length >= 1 && s.spans.length <= 8
+        && s.spans.every((p) => p && Number.isInteger(p.from) && Number.isInteger(p.to) && p.from >= 0 && p.to <= 18 && p.from < p.to))));
 }
 
 const MAX = 30;
