@@ -193,7 +193,11 @@ h2{margin:0; font-family:var(--font-display); font-weight:600; font-size:18px; l
 .sec-row{background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:8px; display:grid; gap:8px}
 .sec-head{display:flex; align-items:center; gap:8px}
 .dot{flex:none; width:12px; height:12px; border-radius:50%; background:var(--sc); display:inline-block}
-.sec-times{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.sec-times{display:grid; gap:6px}
+.sp-row{display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end}
+.sp-row .x{margin-bottom:2px}
+.sp-add{justify-self:start; font-size:12px; padding:5px 10px; border-radius:8px; border:1px dashed var(--muted); background:transparent; color:var(--text); cursor:pointer}
+.sp-add:disabled{opacity:.4; cursor:default}
 .sec-times label{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted)}
 .sec-times select{background:var(--panel)}
 .sec-row .in{background:var(--panel)}
@@ -398,13 +402,37 @@ h2{margin:0; font-family:var(--font-display); font-weight:600; font-size:18px; l
   .verdict{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:520px){
-  .rules,.sec-times{grid-template-columns:1fr}
+  .rules{grid-template-columns:1fr}
   .scrub-scale{padding:0 48px}
 }
 @media (prefers-reduced-motion:no-preference){
   .btn,.icon-btn,.x,.tab{transition:background .15s, border-color .15s, color .15s}
 }
 .credit{margin:26px 0 6px; text-align:center; font-size:11px; letter-spacing:.08em; color:var(--faint); opacity:.8}
+
+/* Decoración de fondo: torre de control y avión, muy tenues, detrás del contenido */
+:root{--art-tower:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 420%22 fill=%22none%22 stroke=%22%235B9BE8%22 stroke-width=%223%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M100 8V62%22/%3E%3Ccircle cx=%22100%22 cy=%228%22 r=%225%22 fill=%22%235B9BE8%22 fill-opacity=%22.5%22/%3E%3Cpath d=%22M84 40H116M90 52H110%22/%3E%3Cpath d=%22M72 72H128L150 96H50Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.18%22/%3E%3Cpath d=%22M50 96H150L162 132H38Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.10%22/%3E%3Cpath d=%22M68 96L63 132M88 96L86 132M112 96L114 132M132 96L137 132%22/%3E%3Crect x=%2232%22 y=%22132%22 width=%22136%22 height=%229%22 rx=%222%22 fill=%22%235B9BE8%22 fill-opacity=%22.22%22/%3E%3Cpath d=%22M84 141H116L124 388H76Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.12%22/%3E%3Cpath d=%22M86 180H114M85 230H115M84 280H116M82 330H118%22/%3E%3Crect x=%2244%22 y=%22388%22 width=%22112%22 height=%2214%22 rx=%222%22 fill=%22%235B9BE8%22 fill-opacity=%22.2%22/%3E%3Cpath d=%22M4 402H196%22/%3E%3C/svg%3E"); --art-plane:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 420 170%22 fill=%22none%22 stroke=%22%235B9BE8%22 stroke-width=%223%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M22 92C22 72 62 62 124 62H304C354 62 394 76 402 90C394 104 354 112 304 112H124C62 112 22 108 22 92Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.12%22/%3E%3Cpath d=%22M44 68L20 18H62L106 64Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.2%22/%3E%3Cpath d=%22M64 90L22 108H54L96 94Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.15%22/%3E%3Cpath d=%22M190 96L124 150H166L262 100Z%22 fill=%22%235B9BE8%22 fill-opacity=%22.2%22/%3E%3Cellipse cx=%22196%22 cy=%22124%22 rx=%2224%22 ry=%229%22 fill=%22%235B9BE8%22 fill-opacity=%22.25%22/%3E%3Cpath d=%22M350 70C366 70 384 78 392 88%22/%3E%3Cg fill=%22%235B9BE8%22 fill-opacity=%22.5%22 stroke=%22none%22%3E%3Ccircle cx=%22150%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22170%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22190%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22210%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22230%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22250%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22270%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22290%22 cy=%2280%22 r=%223.5%22/%3E%3Ccircle cx=%22310%22 cy=%2280%22 r=%223.5%22/%3E%3C/g%3E%3Cpath d=%22M-40 60H10M-60 92H0M-30 124H14%22 stroke-dasharray=%222 12%22 opacity=%22.6%22/%3E%3C/svg%3E"); --art-o:.13}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--art-o:.16}}
+:root[data-theme="light"]{--art-o:.16}
+.app{position:relative; z-index:1}
+body::before{content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:var(--art-o);
+  background-image:var(--art-plane), var(--art-tower);
+  background-repeat:no-repeat;
+  background-position:right 3vw bottom 12vh, left 1.5vw bottom 0;
+  background-size:clamp(220px,34vw,520px) auto, clamp(90px,13vw,210px) auto}
+.bd-stage{background:transparent}
+.bd-stage:fullscreen,.bd-stage.maxi{background:var(--bg); isolation:isolate}
+.bd-stage.maxi::before,.bd-stage:fullscreen::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:calc(var(--art-o) + .03);
+  background-image:var(--art-plane), var(--art-tower); background-repeat:no-repeat;
+  background-position:right 2vw bottom 6vh, left 1vw bottom 0;
+  background-size:clamp(240px,30vw,560px) auto, clamp(100px,11vw,220px) auto}
+.bd-grid{isolation:isolate; background:var(--panel)}
+.bd-grid::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:calc(var(--art-o) + .10);
+  background-image:var(--art-plane), var(--art-tower); background-repeat:no-repeat;
+  background-position:right 22% bottom 9%, right 2% bottom 1%;
+  background-size:clamp(220px,32%,480px) auto, clamp(90px,10%,170px) auto}
+.bd-time,.bd-rest{background:color-mix(in srgb, var(--panel) 62%, transparent)}
+@media print{body::before,.bd-stage::before{display:none!important}}
 
 .booting #viewBuild,.booting #viewWeek,.booting #nav,.booting #buildActions{visibility:hidden}
 .visitor #viewBuild,.visitor #viewWeek,.visitor #nav,.visitor #buildActions,.visitor #shiftMeta{display:none!important}
@@ -963,7 +991,10 @@ function buildDemand(sectors, T){
   const d = [];
   for (let t = 0; t < T; t++){
     const open = [];
-    sectors.forEach((s, i) => { if (t >= s.from && t < s.to) open.push(i); });
+    sectors.forEach((s, i) => {
+      const sp = s.spans && s.spans.length ? s.spans : [{ from: s.from, to: s.to }];
+      if (sp.some(p => t >= p.from && t < p.to)) open.push(i);
+    });
     d.push(open);
   }
   return d;
@@ -1320,6 +1351,7 @@ function minStaff(sectors, cfg, from){
     maxRun: 4, minRest: 1, seed: 1, mode: 'auto', pins: [], manual: [], pairsMode: 'auto', couples: [],
     stagger: { on: true, a: { from: 7, to: 11 }, b: { from: 11, to: 15 } }
   };
+  DEFAULT.sectors = DEFAULT.sectors.map(sectorOut);
   var KEY = 'cuadrante-atc-v1';
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
@@ -1340,8 +1372,7 @@ function minStaff(sectors, cfg, from){
           var s = clone(DEFAULT);
           s.date = typeof o.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.date) ? o.date : s.date;
           s.sectors = o.sectors.slice(0, MAXSEC).map(function(x){
-            var f = Math.max(0, Math.min(17, x.from | 0)), t = Math.max(f + 1, Math.min(18, x.to | 0));
-            return { name: String(x.name || ''), from: f, to: t };
+            return sectorOut({ name: String(x.name || ''), spans: x.spans, from: x.from, to: x.to });
           });
           s.people = o.people.slice(0, MAXPEOPLE).map(String);
           s.maxRun = [2, 3, 4, 5, 6].indexOf(o.maxRun) >= 0 ? o.maxRun : 4;
@@ -1414,7 +1445,7 @@ function minStaff(sectors, cfg, from){
     state.pins.length = N; state.manual.length = N;
     for (var p = 0; p < N; p++) for (var t = 0; t < T; t++) {
       var pv = state.pins[p][t], mv = state.manual[p][t];
-      if (pv >= 0 && !(pv < S.length && t >= S[pv].from && t < S[pv].to)) state.pins[p][t] = -2;
+      if (pv >= 0 && !(pv < S.length && secOpen(S[pv], t))) state.pins[p][t] = -2;
       if (mv >= S.length) state.manual[p][t] = -1;
     }
   }
@@ -1434,7 +1465,7 @@ function minStaff(sectors, cfg, from){
       if (pins) for (var p = 0; p < N; p++) for (var t = 0; t < T; t++) if (pins[p][t] !== -2 && sch[p][t] !== pins[p][t]) sch[p][t] = pins[p][t];
     }
     var info = analyze(sch, state.sectors, cfg());
-    var key = JSON.stringify([state.sectors.map(function(s){ return [s.from, s.to]; }), state.maxRun, state.minRest, staggerCfg(), couplesCfg()]);
+    var key = JSON.stringify([state.sectors.map(function(s){ return secSpans(s).map(function(p){ return [p.from, p.to]; }); }), state.maxRun, state.minRest, staggerCfg(), couplesCfg()]);
     if (minCache.key !== key) { minCache = { key: key, val: minStaff(state.sectors, cfg()) }; }
     result = { sch: sch, info: info, min: minCache.val };
   }
@@ -1459,6 +1490,19 @@ function minStaff(sectors, cfg, from){
     for (var i = a; i <= b; i++) h += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + lab(i) + '</option>';
     return h;
   }
+  function spanRows(s){
+    var sp = secSpans(s), many = sp.length > 1, h = '';
+    sp.forEach(function(p, k){
+      h += '<div class="sp-row" data-k="' + k + '">' +
+        '<label>' + (k ? 'Reabre' : 'Abre') + ' <select class="in" data-f="from" aria-label="Hora de apertura ' + (k + 1) + '">' + opts(0, 17, p.from) + '</select></label>' +
+        '<label>Cierra <select class="in" data-f="to" aria-label="Hora de cierre ' + (k + 1) + '">' + opts(1, 18, p.to) + '</select></label>' +
+        (many ? '<button class="x" type="button" data-act="delSpan" aria-label="Quitar esta apertura">&times;</button>' : '<span></span>') + '</div>';
+    });
+    var last = sp[sp.length - 1];
+    h += '<button class="sp-add" type="button" data-act="addSpan"' + (last.to >= 17 || sp.length >= 6 ? ' disabled' : '') + '>+ Otra apertura</button>';
+    return h;
+  }
+  function syncSector(s){ var o = sectorOut(s); s.spans = o.spans; s.from = o.from; s.to = o.to; }
   function renderSetup(){
     var N = state.people.length;
     var stOn = state.stagger.on && N >= 4;
@@ -1469,9 +1513,7 @@ function minStaff(sectors, cfg, from){
         '<input class="in" data-f="name" aria-label="Nombre del sector ' + (i + 1) + '" maxlength="24" value="' + esc(s.name) + '">' +
         '<button class="x" type="button" data-act="delSector" aria-label="Quitar sector ' + esc(s.name) + '">&times;</button></div>' +
         '<div class="sec-times">' +
-        '<label>Abre <select class="in" data-f="from" aria-label="Hora de apertura">' + opts(0, 17, s.from) + '</select></label>' +
-        '<label>Cierra <select class="in" data-f="to" aria-label="Hora de cierre">' + opts(1, 18, s.to) + '</select></label>' +
-        '</div></div>';
+        spanRows(s) + '</div></div>';
     }).join('');
     var ppl = state.people.map(function(n, p){
       var sl = stOn ? sgLabel(p) : 0;
@@ -1558,9 +1600,11 @@ function minStaff(sectors, cfg, from){
   setup.addEventListener('change', function(e){
     var t = e.target;
     if (t.dataset.f === 'from' || t.dataset.f === 'to') {
-      var s = state.sectors[+t.closest('.sec-row').dataset.i], v = +t.value;
-      if (t.dataset.f === 'from') { s.from = v; if (s.to <= s.from) s.to = s.from + 1; }
-      else { s.to = v; if (s.from >= s.to) s.from = s.to - 1; }
+      var s = state.sectors[+t.closest('.sec-row').dataset.i], v = +t.value, k = +t.closest('.sp-row').dataset.k;
+      var sp = secSpans(s).map(function(p){ return { from: p.from, to: p.to }; }), p = sp[k];
+      if (t.dataset.f === 'from') { p.from = v; if (p.to <= p.from) p.to = p.from + 1; }
+      else { p.to = v; if (p.from >= p.to) p.from = p.to - 1; }
+      s.spans = sp; syncSector(s);
       renderSetup(); recalc();
     } else if (t.dataset.cp) {
       var cp = t.dataset.cp.split('.'), ci = +cp[0], cj = +cp[1], val = +t.value;
@@ -1583,8 +1627,14 @@ function minStaff(sectors, cfg, from){
     if (!b) return;
     var a = b.dataset.act;
     if (a === 'addSector' && state.sectors.length < MAXSEC) {
-      state.sectors.push({ name: 'Sector ' + (state.sectors.length + 1), from: 0, to: 18 });
+      state.sectors.push(sectorOut({ name: 'Sector ' + (state.sectors.length + 1), from: 0, to: 18 }));
       renderSetup(); recalc();
+    } else if (a === 'addSpan') {
+      var s2 = state.sectors[+b.closest('.sec-row').dataset.i], sp2 = secSpans(s2).map(function(p){ return { from: p.from, to: p.to }; }), l2 = sp2[sp2.length - 1];
+      if (l2.to < 17 && sp2.length < 6) { sp2.push({ from: Math.min(17, l2.to + 1), to: 18 }); s2.spans = sp2; syncSector(s2); renderSetup(); recalc(); }
+    } else if (a === 'delSpan') {
+      var s3 = state.sectors[+b.closest('.sec-row').dataset.i], sp3 = secSpans(s3).map(function(p){ return { from: p.from, to: p.to }; });
+      if (sp3.length > 1) { sp3.splice(+b.closest('.sp-row').dataset.k, 1); s3.spans = sp3; syncSector(s3); renderSetup(); recalc(); }
     } else if (a === 'delSector') {
       dropSector(+b.closest('.sec-row').dataset.i);
       renderSetup(); recalc();
@@ -1699,14 +1749,19 @@ function minStaff(sectors, cfg, from){
     var cards = state.sectors.map(function(s, i){
       var head = function(extra){ return '<header class="card-h">' + esc(secName(i)) + '<span>' + extra + '</span></header>'; };
       var st = 'style="--sc:var(--s' + i + ')"';
-      if (t < s.from) return '<article class="card off" ' + st + '>' + head('abre ' + lab(s.from)) + '<p class="msg">Aún cerrado.</p></article>';
-      if (t >= s.to) return '<article class="card off" ' + st + '>' + head('cerró ' + lab(s.to)) + '<p class="msg">Sector cerrado.</p></article>';
+      var sps = secSpans(s), cur = null, nxt = null, prv = null;
+      sps.forEach(function(p){ if (t >= p.from && t < p.to) cur = p; else if (p.from > t && !nxt) nxt = p; else if (p.to <= t) prv = p; });
+      if (!cur) {
+        if (!prv) return '<article class="card off" ' + st + '>' + head('abre ' + lab(nxt.from)) + '<p class="msg">Aún cerrado.</p></article>';
+        if (nxt) return '<article class="card off" ' + st + '>' + head('reabre ' + lab(nxt.from)) + '<p class="msg">Cerrado temporalmente.</p></article>';
+        return '<article class="card off" ' + st + '>' + head('cerró ' + lab(prv.to)) + '<p class="msg">Sector cerrado.</p></article>';
+      }
       var w = whoAt(i, t);
-      if (!w.length) return '<article class="card miss" ' + st + '>' + head('abierto hasta ' + lab(s.to)) + '<p class="msg">Sin cubrir. Faltan 2 controladores.</p></article>';
+      if (!w.length) return '<article class="card miss" ' + st + '>' + head('abierto hasta ' + lab(cur.to)) + '<p class="msg">Sin cubrir. Faltan 2 controladores.</p></article>';
       var li = w.map(function(p){
         return '<li><span class="n">' + (entersAt(p, t) ? '<em class="tag">entra</em>' : '') + esc(nameOf(p)) + '</span><small>hasta ' + lab(blockEnd(p, t)) + '</small></li>';
       }).join('');
-      return '<article class="card" ' + st + '>' + head('hasta ' + lab(s.to)) + '<ul class="pair">' + li + '</ul></article>';
+      return '<article class="card" ' + st + '>' + head('hasta ' + lab(cur.to)) + '<ul class="pair">' + li + '</ul></article>';
     }).join('');
     $('#cards').innerHTML = cards || '<p class="hint">No hay sectores definidos.</p>';
 
@@ -1759,8 +1814,10 @@ function minStaff(sectors, cfg, from){
     h += '</div>';
     state.sectors.forEach(function(s, i){
       h += '<div class="g-row g-sec" style="--sc:var(--s' + i + ')"><div class="g-name"><i class="dot"></i><span class="nm">' + esc(secName(i)) + '</span></div><div class="track"></div>';
-      var span = s.to - s.from;
-      h += '<div class="s-bar" style="grid-column:' + (s.from + 2) + '/' + (s.to + 2) + '" title="' + esc(secName(i)) + ' · ' + lab(s.from) + '–' + lab(s.to) + '">' + (span >= 3 ? lab(s.from) + ' – ' + lab(s.to) : (span >= 2 ? '→ ' + lab(s.to) : '')) + '</div>';
+      secSpans(s).forEach(function(p){
+        var span = p.to - p.from;
+        h += '<div class="s-bar" style="grid-column:' + (p.from + 2) + '/' + (p.to + 2) + '" title="' + esc(secName(i)) + ' · ' + lab(p.from) + '–' + lab(p.to) + '">' + (span >= 3 ? lab(p.from) + ' – ' + lab(p.to) : (span >= 2 ? '→ ' + lab(p.to) : '')) + '</div>';
+      });
       var a = 0;
       while (a < T) {
         if (info.uncovered[a].indexOf(i) >= 0) { var b = a; while (b < T && info.uncovered[b].indexOf(i) >= 0) b++; h += '<div class="s-miss" style="grid-column:' + (a + 2) + '/' + (b + 2) + '" title="Sin cubrir ' + lab(a) + '–' + lab(b) + '"></div>'; a = b; } else a++;
@@ -1805,7 +1862,7 @@ function minStaff(sectors, cfg, from){
       h += '<tr data-slot="' + t + '"><td class="t">' + lab(t) + '–' + lab(t + 1) + '</td>';
       state.sectors.forEach(function(s, i){
         var st = 'style="--sc:var(--s' + i + ')"';
-        if (t < s.from || t >= s.to) { h += '<td class="off">—</td>'; return; }
+        if (!secOpen(s, t)) { h += '<td class="off">—</td>'; return; }
         var w = whoAt(i, t);
         if (!w.length) { h += '<td class="miss">Sin cubrir</td>'; return; }
         h += '<td class="s" ' + st + '>' + w.map(function(p){ var n = esc(nameOf(p)); return entersAt(p, t) ? '<b>' + n + '</b>' : '<span>' + n + '</span>'; }).join(' · ') + '</td>';
@@ -1945,7 +2002,7 @@ function minStaff(sectors, cfg, from){
     var items = [];
     if (mixed) { items.push(['free', 'Automático (soltar)', pv === -2]); if (pv === -2) items.push(['keep', 'Fijar como está', false]); }
     items.push(['rest', 'Descanso', cur === -1 && (!mixed || pv !== -2)]);
-    state.sectors.forEach(function(s, i){ if (t >= s.from && t < s.to) items.push(['s' + i, secName(i), cur === i && (!mixed || pv !== -2), i]); });
+    state.sectors.forEach(function(s, i){ if (secOpen(s, t)) items.push(['s' + i, secName(i), cur === i && (!mixed || pv !== -2), i]); });
     var m = document.createElement('div');
     m.className = 'cmenu'; m.id = 'cellMenu'; m.setAttribute('role', 'menu');
     m.innerHTML = '<div class="cm-h"><b>' + esc(nameOf(p)) + '</b><span>' + lab(t) + '</span></div>' +
@@ -1971,7 +2028,7 @@ function minStaff(sectors, cfg, from){
           if (v === 'free') val = -2;
           else if (v === 'keep') val = result.sch[w][u];
           else if (v === 'rest') val = -1;
-          else { val = +v.slice(1); var sc = state.sectors[val]; if (u < sc.from || u >= sc.to) continue; }
+          else { val = +v.slice(1); var sc = state.sectors[val]; if (!secOpen(sc, u)) continue; }
           if (mixed) state.pins[w][u] = val; else state.manual[w][u] = val;
         }
       });
@@ -1989,7 +2046,7 @@ function minStaff(sectors, cfg, from){
     for (var t = 0; t < T; t++) {
       var parts = [];
       state.sectors.forEach(function(s, i){
-        if (t < s.from || t >= s.to) return;
+        if (!secOpen(s, t)) return;
         var w = whoAt(i, t);
         parts.push(secName(i) + ': ' + (w.length ? w.map(nameOf).join(' + ') : 'SIN CUBRIR'));
       });
@@ -2023,6 +2080,29 @@ function minStaff(sectors, cfg, from){
     return [c(d1), c(d2)];
   }
 
+  /* --- sectores con varias aperturas en la noche --- */
+  function secSpans(s){
+    if (s && Array.isArray(s.spans) && s.spans.length) return s.spans;
+    var f = Math.max(0, Math.min(17, ((s && s.from) | 0))), t = Math.max(f + 1, Math.min(18, ((s && s.to) | 0)));
+    return [{ from: f, to: t }];
+  }
+  function secOpen(s, t){ var a = secSpans(s); for (var i = 0; i < a.length; i++) if (t >= a[i].from && t < a[i].to) return true; return false; }
+  function normSpans(arr){
+    var a = (arr || []).map(function(p){ var f = Math.max(0, Math.min(17, (p.from | 0))), t = Math.max(1, Math.min(18, (p.to | 0))); return { from: f, to: t }; })
+      .filter(function(p){ return p.to > p.from; }).sort(function(x, y){ return x.from - y.from; });
+    var out = [];
+    a.forEach(function(p){ var l = out[out.length - 1]; if (l && p.from <= l.to) l.to = Math.max(l.to, p.to); else out.push({ from: p.from, to: p.to }); });
+    return out;
+  }
+  function sectorOut(s){
+    var sp = normSpans(secSpans(s).slice(0, 8));
+    if (!sp.length) sp = [{ from: 0, to: 1 }];
+    return { name: String((s && s.name) || ''), spans: sp, from: sp[0].from, to: sp[sp.length - 1].to };
+  }
+  function spansText(s, sep, join){
+    return secSpans(s).map(function(p){ return lab(p.from) + (sep || '–') + lab(p.to); }).join(join || ' · ');
+  }
+
   function nm(bd, p){ var n = (bd.names[p] || '').trim(); return n || 'Controlador ' + (p + 1); }
 
   function secLabel(bd, i){ var n = (bd.sectors[i].name || '').trim(); return n || 'Sector ' + (i + 1); }
@@ -2039,10 +2119,7 @@ function minStaff(sectors, cfg, from){
       names.push(String((p && p.name) || ''));
       rows.push(r.split('').map(function(ch){ return ch === '.' ? -1 : (+ch); }));
     });
-    var sectors = d.sectors.slice(0, MAXSEC).map(function(s){
-      var f = Math.max(0, Math.min(17, (s && s.from) | 0)), t = Math.max(f + 1, Math.min(18, (s && s.to) | 0));
-      return { name: String((s && s.name) || ''), from: f, to: t };
-    });
+    var sectors = d.sectors.slice(0, MAXSEC).map(function(s){ return sectorOut(s || {}); });
     return { id: n.id, date: typeof d.date === 'string' ? d.date : n.id, sectors: sectors, names: names, rows: rows,
       maxRun: (d.maxRun | 0) || 4, minRest: (d.minRest | 0) || 1, published: true, publishedAt: d.publishedAt };
   }
@@ -2051,8 +2128,7 @@ function minStaff(sectors, cfg, from){
     var N = bd.rows.length, cols = [];
     bd.sectors.forEach(function(s, i){
       var keyAt = function(t){
-        if (t < s.from) return 'pre';
-        if (t >= s.to) return 'post';
+        if (!secOpen(s, t)) { var sp = secSpans(s); return t < sp[0].from ? 'pre' : (t >= sp[sp.length - 1].to ? 'post' : 'gap'); }
         var w = [];
         for (var p = 0; p < N; p++) if (bd.rows[p][t] === i) w.push(p);
         return w.length ? 'p:' + w.join(',') : 'miss';
@@ -2089,7 +2165,7 @@ function minStaff(sectors, cfg, from){
     h += '<div class="bd-scroll"><div class="bd-grid" style="grid-template-columns:' + cols + ';min-width:' + minw + 'px">';
     h += '<div class="bd-th bd-corner" style="grid-row:1;grid-column:1">Hora</div>';
     bd.sectors.forEach(function(s, i){
-      h += '<div class="bd-th" style="--sc:var(--s' + i + ');grid-row:1;grid-column:' + (i + 2) + '"><b>' + esc(secLabel(bd, i)) + '</b><small>' + lab(s.from) + ' – ' + lab(s.to) + '</small></div>';
+      h += '<div class="bd-th" style="--sc:var(--s' + i + ');grid-row:1;grid-column:' + (i + 2) + '"><b>' + esc(secLabel(bd, i)) + '</b><small>' + spansText(s) + '</small></div>';
     });
     if (bdRest) h += '<div class="bd-th bd-resth" style="grid-row:1;grid-column:' + (K + 2) + '"><b>Descansan</b></div>';
     for (t = 0; t < T; t++) {
@@ -2100,7 +2176,8 @@ function minStaff(sectors, cfg, from){
       blocks.forEach(function(b){
         var span = b.r1 - b.r0;
         var st = 'style="--sc:var(--s' + i + ');grid-row:' + (b.r0 + 2) + '/' + (b.r1 + 2) + ';grid-column:' + (i + 2) + '"';
-        if (b.key === 'pre') h += '<div class="bd-blk off" ' + st + '><span>Abre ' + lab(bd.sectors[i].from) + '</span></div>';
+        if (b.key === 'pre') h += '<div class="bd-blk off" ' + st + '><span>Abre ' + lab(secSpans(bd.sectors[i])[0].from) + '</span></div>';
+        else if (b.key === 'gap') h += '<div class="bd-blk off" ' + st + '><span>Cerrado · reabre ' + lab(b.r1) + '</span></div>';
         else if (b.key === 'post') h += '<div class="bd-blk off" ' + st + '><span>Cerrado</span></div>';
         else if (b.key === 'miss') h += '<div class="bd-blk miss" ' + st + '><b>Sin cubrir</b><span>Faltan 2 controladores</span></div>';
         else {
@@ -2226,8 +2303,10 @@ function minStaff(sectors, cfg, from){
       var name = secLabel(bd, i).toUpperCase();
       fitSize(doc, name, colW - 4, 9.5, 6);
       doc.text(clip(doc, name, colW - 4), x + colW / 2, headY + 4.4, { align: 'center' });
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5);
-      doc.text(lab(s.from) + ' - ' + lab(s.to), x + colW / 2, headY + 8, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      var stxt = spansText(s, ' - ', '  /  ');
+      fitSize(doc, stxt, colW - 3, 6.5, 4);
+      doc.text(clip(doc, stxt, colW - 3), x + colW / 2, headY + 8, { align: 'center' });
     });
     var rx = M + timeW + K * colW;
     doc.setFillColor(232, 237, 240); doc.rect(rx, headY, restW, headH, 'F');
@@ -2248,11 +2327,11 @@ function minStaff(sectors, cfg, from){
       var rgb = hexRgb(SEC_HEX[i % 8]);
       blocks.forEach(function(b){
         var x = M + timeW + i * colW + 0.6, y = y0 + b.r0 * rowH + 0.6, w = colW - 1.2, h = (b.r1 - b.r0) * rowH - 1.2, span = b.r1 - b.r0;
-        if (b.key === 'pre' || b.key === 'post') {
+        if (b.key === 'pre' || b.key === 'post' || b.key === 'gap') {
           doc.setFillColor(246, 248, 249); doc.setDrawColor(215, 222, 227); doc.setLineWidth(0.2);
           doc.roundedRect(x, y, w, h, 1, 1, 'FD');
           doc.setFont('helvetica', 'italic'); doc.setFontSize(6.5); doc.setTextColor(140, 150, 158);
-          doc.text(b.key === 'pre' ? 'abre ' + lab(bd.sectors[i].from) : 'cerrado', x + w / 2, y + Math.min(h / 2 + 1, 5), { align: 'center' });
+          doc.text(b.key === 'pre' ? 'abre ' + lab(secSpans(bd.sectors[i])[0].from) : (b.key === 'gap' ? 'reabre ' + lab(b.r1) : 'cerrado'), x + w / 2, y + Math.min(h / 2 + 1, 5), { align: 'center' });
         } else if (b.key === 'miss') {
           doc.setFillColor(255, 230, 226); doc.setDrawColor(200, 60, 45); doc.setLineWidth(0.3);
           doc.roundedRect(x, y, w, h, 1, 1, 'FD');
@@ -2335,7 +2414,7 @@ function minStaff(sectors, cfg, from){
       var lx = x + 2, ly = y + ch - legendH + 3;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(5.2);
       bd.sectors.forEach(function(s, k){
-        var txt = secLabel(bd, k) + ' ' + lab(s.from) + '-' + lab(s.to), w = doc.getTextWidth(txt) + 5;
+        var txt = secLabel(bd, k) + ' ' + spansText(s, '-', ' / '), w = doc.getTextWidth(txt) + 5;
         if (lx + w > x + cw - 1) { lx = x + 2; ly += 3; }
         var rgb2 = hexRgb(SEC_HEX[k % 8]);
         doc.setFillColor(rgb2[0], rgb2[1], rgb2[2]); doc.rect(lx, ly - 1.8, 2.2, 2.2, 'F');
@@ -2373,7 +2452,7 @@ function minStaff(sectors, cfg, from){
   function draftBd(){
     return {
       id: state.date, date: state.date,
-      sectors: state.sectors.map(function(s){ return { name: s.name, from: s.from, to: s.to }; }),
+      sectors: state.sectors.map(sectorOut),
       names: state.people.map(function(_, p){ return nameOf(p); }),
       rows: result.sch, maxRun: state.maxRun, minRest: state.minRest, published: false
     };
@@ -2572,7 +2651,7 @@ function minStaff(sectors, cfg, from){
   function bdPayload(bd, when){
     return {
       date: bd.date, publishedAt: when || bd.publishedAt || new Date().toISOString(), maxRun: bd.maxRun, minRest: bd.minRest,
-      sectors: bd.sectors.map(function(s){ return { name: s.name, from: s.from, to: s.to }; }),
+      sectors: bd.sectors.map(sectorOut),
       people: bd.rows.map(function(r, p){ return { name: bd.names[p], row: r.map(function(x){ return x < 0 ? '.' : String(x); }).join('') }; })
     };
   }
@@ -2632,7 +2711,7 @@ function minStaff(sectors, cfg, from){
   function loadNight(id){
     var bd = nightFor(id);
     if (!bd) return;
-    state.date = bd.date; state.sectors = bd.sectors.map(function(s){ return { name: s.name, from: s.from, to: s.to }; });
+    state.date = bd.date; state.sectors = bd.sectors.map(sectorOut);
     state.people = bd.names.slice(); state.maxRun = bd.maxRun; state.minRest = bd.minRest;
     state.mode = 'manual'; state.manual = bd.rows.map(function(r){ return r.slice(); }); state.pins = [];
     state.pairsMode = 'auto'; state.couples = [];
@@ -2690,7 +2769,7 @@ function minStaff(sectors, cfg, from){
         var seed = ((state.seed + weekDays().indexOf(ids[i]) * 131) % 9973) + 1;
         var sch = solve(N, state.sectors, cfg({ seed: seed, beam: 60, cands: 18 }));
         if (analyze(sch, state.sectors, cfg()).shortSeats > 0) gaps++;
-        var bd = { date: ids[i], sectors: state.sectors.map(function(s){ return { name: s.name, from: s.from, to: s.to }; }),
+        var bd = { date: ids[i], sectors: state.sectors.map(sectorOut),
           names: state.people.map(function(_, p){ return nameOf(p); }), rows: sch, maxRun: state.maxRun, minRest: state.minRest };
         var r = await caps.db.doc('noches/' + ids[i]).set(bdPayload(bd, new Date().toISOString()));
         if (r && r.removed) removedAll = removedAll.concat(r.removed);
