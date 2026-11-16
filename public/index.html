@@ -1048,10 +1048,10 @@ function assignSectors(chosen, open, prevSec, pinSec, partner){
   return { out, covered };
 }
 
-function solve(N, sectors, cfg){
+function solveCore(N, sectors, cfg){
   const T = cfg.T, maxRun = cfg.maxRun, minRest = cfg.minRest;
   const B = cfg.beam || 60, C = cfg.cands || 18;
-  const W = Object.assign({ reentry: 22, reentryShort: 5, fair: 3, stag: 5, shortBlock: 14 }, cfg.w || {});
+  const W = Object.assign({ reentry: 60, reentryShort: 12, restGoal: 8, fair: 3, stag: 5, shortBlock: 30, shortBlock2: 20 }, cfg.w || {});
   const rnd = mulberry32((cfg.seed | 0) || 1);
   const demand = buildDemand(sectors, T);
   // Parejas de salida escalonada: trabajan una ventana fija y luego descansan lo más posible.
@@ -1211,7 +1211,7 @@ function solve(N, sectors, cfg){
           } else {
             run[p] = 0;
             rest[p] = s.run[p] > 0 ? 1 : Math.min(99, s.rest[p] + 1);
-            if (s.run[p] === 1) cost += W.shortBlock;
+            if (s.run[p] === 1) cost += W.shortBlock; else if (s.run[p] === 2) cost += W.shortBlock2;
           }
         }
         // Descansos largos: cuesta volver a trabajar, y más si el descanso previo fue corto.
@@ -1219,7 +1219,7 @@ function solve(N, sectors, cfg){
           if (run[p] > maxRun) cost += 5000;
           if (s.run[p] === 0 && s.total[p] > 0 && s.rest[p] < minRest) cost += 3000;
           if (s.run[p] === 0 && s.total[p] > 0){
-            cost += W.reentry + Math.max(0, 6 - Math.min(s.rest[p], 6)) * W.reentryShort;
+            cost += W.reentry + Math.max(0, W.restGoal - Math.min(s.rest[p], W.restGoal)) * W.reentryShort;
             const gi = memberOf[p];
             if (gi >= 0 && t >= stag[gi].to) cost += 60 + 6 * (T - t);
           }
@@ -1268,6 +1268,39 @@ function solve(N, sectors, cfg){
     schedule.push(r);
   }
   return schedule;
+}
+
+/* Calidad de descansos: bloques de trabajo, bloques cortos (<= 1 h) y descansos intermedios cortos (< 3 h). Menor es mejor. */
+function restQuality(schedule, T){
+  let blocks = 0, shortB = 0, shortR = 0, pen = 0;
+  for (const row of schedule){
+    let run = 0, rest = 0, started = false;
+    for (let t = 0; t < T; t++){
+      if (row[t] >= 0){
+        if (run === 0 && started){ if (rest < 6) shortR++; pen += Math.max(0, 8 - rest); }
+        run++; started = true; rest = 0;
+      } else {
+        if (run > 0){ blocks++; if (run <= 2) shortB++; run = 0; }
+        rest++;
+      }
+    }
+    if (run > 0){ blocks++; if (run <= 2) shortB++; }
+  }
+  return blocks * 10 + shortB * 25 + shortR * 15 + pen * 3;
+}
+
+/* Reparto: con parejas automáticas se intenta primero con parejas fijas (1-2, 3-4, 5-6...) y se compara con el reparto libre. */
+function solve(N, sectors, cfg){
+  const free = solveCore(N, sectors, cfg);
+  if (!cfg.autoPairs || cfg.pins || N < 4 || (cfg.couples && cfg.couples.length)) return free;
+  const couples = [];
+  for (let p = 0; p + 1 < N; p += 2) couples.push([p, p + 1]);
+  const paired = solveCore(N, sectors, Object.assign({}, cfg, { couples }));
+  const bad = sc => { const a = analyze(sc, sectors, cfg); return a.shortSeats + a.pairBroken + a.restViolations + a.runViolations + a.outside; };
+  const bp = bad(paired), bf = bad(free);
+  if (bp > bf) return free;
+  if (bp < bf) return paired;
+  return restQuality(paired, cfg.T) <= restQuality(free, cfg.T) + 40 ? paired : free;
 }
 
 function analyze(schedule, sectors, cfg){
@@ -1433,7 +1466,7 @@ function minStaff(sectors, cfg, from){
     return out;
   }
   function stgText(k){ var m = stagGroups()[k === 'a' ? 0 : 1]; return m ? nameOf(m[0]) + ' y ' + nameOf(m[1]) : 'sin definir (elígela en Parejas)'; }
-  function cfg(extra){ return Object.assign({ T: T, maxRun: state.maxRun, minRest: state.minRest, seed: state.seed, stagger: staggerCfg(), couples: couplesCfg() }, extra || {}); }
+  function cfg(extra){ return Object.assign({ T: T, maxRun: state.maxRun, minRest: state.minRest, seed: state.seed, stagger: staggerCfg(), couples: couplesCfg(), autoPairs: state.pairsMode !== 'manual' }, extra || {}); }
   function nameOf(p){ var n = (state.people[p] || '').trim(); return n || 'Controlador ' + (p + 1); }
   function secName(i){ var n = (state.sectors[i].name || '').trim(); return n || 'Sector ' + (i + 1); }
 
